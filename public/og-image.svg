@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="mesh1" cx="30%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#B026FF" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#080811" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="mesh2" cx="70%" cy="70%" r="50%">
+      <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#080811" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="50%" stop-color="#00E5FF" />
+      <stop offset="100%" stop-color="#B026FF" />
+    </linearGradient>
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#070710" />
+  <rect width="1200" height="630" fill="url(#mesh1)" />
+  <rect width="1200" height="630" fill="url(#mesh2)" />
+
+  <!-- Outer Neon Border -->
+  <rect x="24" y="24" width="1152" height="582" rx="32" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2" />
+
+  <!-- Badge -->
+  <rect x="475" y="90" width="250" height="42" rx="21" fill="rgba(176, 38, 255, 0.2)" stroke="#B026FF" stroke-width="1.5" />
+  <text x="600" y="117" font-family="'Outfit', sans-serif" font-weight="800" font-size="16" fill="#D88BFF" text-anchor="middle" letter-spacing="3">50 LEVELS • DAILY CHALLENGE</text>
+
+  <!-- Main Title -->
+  <text x="600" y="260" font-family="'Outfit', sans-serif" font-weight="900" font-size="108" fill="url(#titleGrad)" text-anchor="middle" filter="url(#neonGlow)" letter-spacing="4">COLOR CHAOS</text>
+
+  <!-- Tagline -->
+  <text x="600" y="340" font-family="'Outfit', sans-serif" font-weight="700" font-size="34" fill="#A0AEC0" text-anchor="middle">
+    Trust your eyes. <tspan fill="#00E5FF" font-weight="900">Beat the chaos.</tspan>
+  </text>
+
+  <!-- Stroop Teaser -->
+  <rect x="360" y="390" width="480" height="90" rx="20" fill="rgba(18, 18, 32, 0.85)" stroke="rgba(0, 229, 255, 0.4)" stroke-width="2" />
+  <text x="600" y="445" font-family="'Outfit', sans-serif" font-weight="900" font-size="38" fill="#00FF88" text-anchor="middle" filter="url(#neonGlow)">RED (in green ink)</text>
+  <text x="600" y="470" font-family="'Outfit', sans-serif" font-weight="700" font-size="16" fill="#8C94B2" text-anchor="middle">👉 TAP GREEN, NOT RED!</text>
+
+  <!-- Features Footer -->
+  <text x="600" y="550" font-family="'Outfit', sans-serif" font-weight="800" font-size="20" fill="#00E5FF" text-anchor="middle" letter-spacing="2">
+    ⚡ FREE BROWSER GAME • ⚡ 30s RAPID ROUNDS • ⚡ STREAK MULTIPLIERS
+  </text>
+</svg>

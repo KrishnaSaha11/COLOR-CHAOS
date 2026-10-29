@@ -172,21 +172,40 @@ html, body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-height: 60px;
-  height: 64px;
-  border-radius: 16px;
+  gap: 8px;
+  min-height: 38px;
+  border-radius: 14px;
   border: 2px solid var(--btn-color);
   background: rgba(14, 15, 28, 0.85);
   color: #FFFFFF;
   font-size: 1.15rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
   box-shadow: 0 0 14px var(--btn-glow), inset 0 0 12px rgba(255, 255, 255, 0.04);
   transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
   outline: none;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.6);
 }
 
 .color-btn::before {
@@ -388,3 +407,33 @@ html, body {
     transform: translate(-50%, 0);
   }
 }
+
+/* Accessibility: Focus outlines for keyboard navigation */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #00E5FF;
+  outline-offset: 3px;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.7);
+}
+
+/* Accessibility: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .shake-effect {
+    animation: none !important;
+  }
+  .pop-animation {
+    animation: none !important;
+  }
+  .neon-backdrop::before,
+  .neon-backdrop::after {
+    animation: none !important;
+  }
+}
+

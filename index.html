@@ -2,19 +2,154 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#080811" />
+    <meta name="theme-color" content="#070710" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="COLOR CHAOS - A fast-paced, addictive neon arcade Stroop effect color reaction game. Trust your eyes. Beat the chaos!" />
-    <title>COLOR CHAOS | Neon Color Reaction Arcade Game</title>
+
+    <!-- Primary SEO Meta Tags -->
+    <title>COLOR CHAOS — Free Color Reaction Game Online</title>
+    <meta name="title" content="COLOR CHAOS — Free Color Reaction Game Online" />
+    <meta name="description" content="Play COLOR CHAOS, a free online color reaction game. Match the actual text color, beat the timer, unlock 50 challenging levels, and test your attention and reaction speed." />
+    <meta name="keywords" content="color chaos, color reaction game, stroop effect game, brain reaction speed, cognitive reaction test, free online arcade game" />
+    <meta name="author" content="Krishna Saha" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Canonical URL (Configurable for custom domain/Vercel) -->
+    <link rel="canonical" href="https://color-chaos.vercel.app/" id="canonical-url" />
+
+    <!-- Open Graph / Facebook / LinkedIn / Instagram -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://color-chaos.vercel.app/" />
+    <meta property="og:site_name" content="COLOR CHAOS" />
+    <meta property="og:title" content="COLOR CHAOS — Free Color Reaction Game Online" />
+    <meta property="og:description" content="Play COLOR CHAOS, a free online color reaction game. Match the actual text color, beat the timer, unlock 50 challenging levels, and test your attention and reaction speed." />
+    <meta property="og:image" content="https://color-chaos.vercel.app/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://color-chaos.vercel.app/" />
+    <meta name="twitter:title" content="COLOR CHAOS — Free Color Reaction Game Online" />
+    <meta name="twitter:description" content="Play COLOR CHAOS, a free online color reaction game. Match the actual text color, beat the timer, unlock 50 challenging levels, and test your attention and reaction speed." />
+    <meta name="twitter:image" content="https://color-chaos.vercel.app/og-image.svg" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Schema.org JSON-LD Structured Data: VideoGame & WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["VideoGame", "WebApplication"],
+          "@id": "https://color-chaos.vercel.app/#game",
+          "name": "COLOR CHAOS",
+          "alternateName": "Color Chaos Online",
+          "url": "https://color-chaos.vercel.app/",
+          "description": "A free browser-based color reaction game based on the cognitive Stroop effect. Players match the actual text color rather than the word meaning across 50 progressive levels and seeded Daily Challenges.",
+          "genre": ["Puzzle", "Reaction Game", "Arcade"],
+          "gamePlatform": ["Web Browser", "Mobile Browser", "Desktop Browser"],
+          "applicationCategory": "GameApplication",
+          "operatingSystem": "All",
+          "inLanguage": "en",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Krishna Saha"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://color-chaos.vercel.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is COLOR CHAOS free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, COLOR CHAOS is completely 100% free to play in any modern web browser on mobile or desktop without any accounts, paywalls, or downloads."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I play COLOR CHAOS?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A color word is shown in ink of a different color (for example, the word RED in green ink). Your goal is to tap the actual color of the text (green), not the word meaning (red), before the 30-second round ends."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How many levels are there?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "COLOR CHAOS features 50 progressive unlockable levels with increasing color counts (from 5 up to 30 colors), faster pacing, and subtle hue similarities."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does COLOR CHAOS save my progress?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, your highest unlocked level, level high scores, completed levels, and daily streak are saved automatically in your browser's local storage."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I play on mobile?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, COLOR CHAOS is designed mobile-first with touch-friendly button grids, safe-area support, and responsive layouts that work seamlessly on iPhones, Android devices, tablets, and desktops."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the Daily Challenge?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Every calendar day brings a new deterministically seeded color configuration that is identical for all players worldwide. You can replay to beat your score and build your consecutive daily streak."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does this game improve focus?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "COLOR CHAOS challenges cognitive skills such as selective attention, color recognition, quick decision-making, and rapid reaction speed under time pressure. These are skills the gameplay challenges rather than guaranteed clinical or medical improvements."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
+    <!-- Fallback Content for Search Crawlers and Non-JS environments -->
+    <noscript>
+      <div style="padding: 20px; font-family: sans-serif; background: #070710; color: #ffffff;">
+        <h1>COLOR CHAOS — Free Color Reaction Game Online</h1>
+        <p>Play COLOR CHAOS, a free online color reaction game. Match the actual text color, beat the timer, unlock 50 challenging levels, and test your attention and reaction speed.</p>
+        <h2>How to Play</h2>
+        <p>When you see a color word, tap the actual color of the text rather than reading the word itself. JavaScript is required to play the interactive game.</p>
+      </div>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

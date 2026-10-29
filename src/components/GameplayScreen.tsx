@@ -1,21 +1,31 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Flame, Zap } from 'lucide-react';
-import { ColorName, Question, FloatingNotification } from '../types/game';
-import { COLORS, COLOR_LIST, generateQuestion } from '../utils/colors';
+import { Volume2, VolumeX, Flame, Zap, Target } from 'lucide-react';
+import { ColorDef, Question, FloatingNotification, LevelConfig } from '../types/game';
+import { generateQuestion } from '../utils/colors';
 import { playCorrect, playWrong, playStreakBonus, playTick, isSoundEnabled, toggleSound } from '../utils/sound';
 
 interface GameplayScreenProps {
-  onGameOver: (finalScore: number, longestStreak: number) => void;
+  level: number;
+  levelConfig: LevelConfig;
+  availableColors: ColorDef[];
+  isDaily?: boolean;
+  onGameOver: (finalScore: number, longestStreak: number, passedTarget: boolean) => void;
 }
 
 const TOTAL_TIME = 30; // 30 seconds round
 
-export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) => {
+export const GameplayScreen: React.FC<GameplayScreenProps> = ({
+  level,
+  levelConfig,
+  availableColors,
+  isDaily = false,
+  onGameOver
+}) => {
   const [timeLeft, setTimeLeft] = useState<number>(TOTAL_TIME);
   const [score, setScore] = useState<number>(0);
   const [streak, setStreak] = useState<number>(0);
   const [longestStreak, setLongestStreak] = useState<number>(0);
-  const [question, setQuestion] = useState<Question>(() => generateQuestion());
+  const [question, setQuestion] = useState<Question>(() => generateQuestion(availableColors));
   const [isWrong, setIsWrong] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<FloatingNotification[]>([]);
   const [soundOn, setSoundOn] = useState<boolean>(isSoundEnabled());
@@ -38,8 +48,10 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
   const triggerGameOver = useCallback(() => {
     if (isGameOverRef.current) return;
     isGameOverRef.current = true;
-    onGameOver(scoreRef.current, longestStreakRef.current);
-  }, [onGameOver]);
+    const finalScore = scoreRef.current;
+    const passed = finalScore >= levelConfig.targetScore;
+    onGameOver(finalScore, longestStreakRef.current, passed);
+  }, [onGameOver, levelConfig.targetScore]);
 
   // Main high-precision countdown loop
   useEffect(() => {
@@ -99,11 +111,11 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
     }, 650);
   };
 
-  const handleColorChoice = (selectedColor: ColorName) => {
+  const handleColorChoice = (selectedColorId: string) => {
     if (isGameOverRef.current || timeLeftRef.current <= 0) return;
 
     const currentQ = questionRef.current;
-    const isCorrect = selectedColor === currentQ.textColor;
+    const isCorrect = selectedColorId === currentQ.textColor;
 
     if (isCorrect) {
       // Haptic feedback
@@ -120,7 +132,7 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
         setLongestStreak(nextStreak);
       }
 
-      // Check if 5-streak milestone bonus applies
+      // 5-streak milestone bonus: +50 points
       let earnedPoints = 10;
       if (nextStreak % 5 === 0) {
         const bonus = 50;
@@ -136,7 +148,7 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
       setScore(scoreRef.current);
 
       // Generate next question
-      setQuestion(generateQuestion(currentQ));
+      setQuestion(generateQuestion(availableColors, currentQ));
     } else {
       // Wrong answer!
       if ('vibrate' in navigator) {
@@ -160,9 +172,21 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
       addNotification('-2s', 'wrong');
 
       // Next question so player isn't stuck on a wrong answer
-      setQuestion(generateQuestion(currentQ));
+      setQuestion(generateQuestion(availableColors, currentQ));
     }
   };
+
+  // Keyboard accessibility: Keys 1 to 9 trigger matching color
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num) && num >= 1 && num <= availableColors.length) {
+        handleColorChoice(availableColors[num - 1].id);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [availableColors]);
 
   const handleToggleSound = () => {
     const next = toggleSound();
@@ -180,7 +204,34 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
     timerBarColor = '#FFE600';
   }
 
-  const currentDef = COLORS[question.textColor];
+  // Find color definition of question's text color
+  const currentDef = availableColors.find((c) => c.id === question.textColor) || availableColors[0];
+
+  // Grid styling based on total number of colors
+  const colorCount = availableColors.length;
+  let gridColumns = 'repeat(2, 1fr)';
+  let btnHeight = '64px';
+  let btnFontSize = '1.15rem';
+  let dotSize = '14px';
+
+  if (colorCount >= 21) {
+    gridColumns = 'repeat(5, 1fr)';
+    btnHeight = '38px';
+    btnFontSize = '0.68rem';
+    dotSize = '8px';
+  } else if (colorCount >= 13) {
+    gridColumns = 'repeat(4, 1fr)';
+    btnHeight = '42px';
+    btnFontSize = '0.78rem';
+    dotSize = '9px';
+  } else if (colorCount >= 7) {
+    gridColumns = 'repeat(3, 1fr)';
+    btnHeight = '48px';
+    btnFontSize = '0.92rem';
+    dotSize = '11px';
+  }
+
+  const reachedGoal = score >= levelConfig.targetScore;
 
   return (
     <div
@@ -192,36 +243,57 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
         alignItems: 'center',
         flex: 1,
         width: '100%',
-        padding: '12px 6px 16px 6px',
+        padding: '10px 6px 14px 6px',
         position: 'relative'
       }}
     >
       {/* HUD Header */}
       <div style={{ width: '100%' }}>
-        <div className="hud-card">
-          {/* Score */}
+        <div className="hud-card" style={{ padding: '10px 14px' }}>
+          {/* Level Info & Score */}
           <div>
-            <div className="hud-stat-label">SCORE</div>
-            <div className="hud-stat-value" style={{ color: '#00E5FF', textShadow: '0 0 10px rgba(0, 229, 255, 0.5)' }}>
-              {score}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                color: isDaily ? '#FF7700' : '#00E5FF',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em'
+              }}>
+                {isDaily ? 'DAILY CHALLENGE' : `LEVEL ${level}`}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+              <span className="hud-stat-value" style={{ color: '#00E5FF', textShadow: '0 0 10px rgba(0, 229, 255, 0.5)' }}>
+                {score}
+              </span>
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                color: reachedGoal ? '#00FF88' : '#8C94B2',
+                fontFamily: 'var(--font-mono)'
+              }}>
+                / {levelConfig.targetScore}
+              </span>
             </div>
           </div>
 
           {/* Streak Indicator */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div className={`streak-pill ${streak >= 5 ? 'supercharged' : ''}`}>
-              <Flame size={14} color={streak >= 5 ? '#00E5FF' : '#FF7700'} />
+              <Flame size={13} color={streak >= 5 ? '#00E5FF' : '#FF7700'} />
               <span>{streak}x {streak >= 5 ? 'FIRE' : 'STREAK'}</span>
             </div>
             {longestStreak > 0 && (
-              <span style={{ fontSize: '0.68rem', color: '#8C94B2', marginTop: '2px', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.65rem', color: '#8C94B2', marginTop: '2px', fontWeight: 600 }}>
                 BEST: {longestStreak}x
               </span>
             )}
           </div>
 
           {/* Sound & Timer Text */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ textAlign: 'right' }}>
               <div className="hud-stat-label">TIME</div>
               <div
@@ -243,8 +315,8 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
                 background: 'rgba(255, 255, 255, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.12)',
                 borderRadius: '10px',
-                width: '36px',
-                height: '36px',
+                width: '34px',
+                height: '34px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -258,7 +330,7 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
         </div>
 
         {/* Dynamic Timer Bar */}
-        <div className="timer-track">
+        <div className="timer-track" style={{ marginTop: '8px' }}>
           <div
             className="timer-fill"
             style={{
@@ -278,23 +350,28 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
         alignItems: 'center',
         justifyContent: 'center',
         margin: 'auto 0',
-        minHeight: '160px',
+        minHeight: '130px',
         width: '100%'
       }}>
-        {/* Helper Cue */}
+        {/* Helper Cue with Target Goal */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          fontSize: '0.8rem',
+          fontSize: '0.78rem',
           fontWeight: 700,
           color: '#8C94B2',
-          letterSpacing: '0.08em',
+          letterSpacing: '0.06em',
           textTransform: 'uppercase',
-          marginBottom: '10px'
+          marginBottom: '8px'
         }}>
-          <Zap size={14} color="#00E5FF" />
-          <span>TAP THE COLOR OF THE INK</span>
+          <Zap size={13} color="#00E5FF" />
+          <span>TAP COLOR OF INK</span>
+          <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>•</span>
+          <Target size={12} color={reachedGoal ? '#00FF88' : '#FFE600'} />
+          <span style={{ color: reachedGoal ? '#00FF88' : '#FFE600' }}>
+            {reachedGoal ? 'GOAL MET!' : `NEED ${levelConfig.targetScore}`}
+          </span>
         </div>
 
         {/* Main Color Word */}
@@ -302,7 +379,7 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
           key={question.id}
           className="pop-animation"
           style={{
-            fontSize: 'clamp(2.8rem, 13vw, 4.4rem)',
+            fontSize: 'clamp(2.5rem, 11vw, 4rem)',
             fontWeight: 900,
             letterSpacing: '0.06em',
             textTransform: 'uppercase',
@@ -333,20 +410,51 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({ onGameOver }) =>
         ))}
       </div>
 
-      {/* 6 Ergonomic Color Tap Buttons */}
-      <div className="color-buttons-grid">
-        {COLOR_LIST.map((color) => (
+      {/* Dynamic Responsive Color Tap Buttons Grid */}
+      <div
+        className="color-buttons-grid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: gridColumns,
+          gap: colorCount >= 21 ? '6px' : colorCount >= 13 ? '8px' : '10px',
+          width: '100%',
+          maxHeight: '45vh',
+          overflowY: 'auto',
+          paddingBottom: '4px'
+        }}
+      >
+        {availableColors.map((color, idx) => (
           <button
             key={color.id}
             onClick={() => handleColorChoice(color.id)}
             className="color-btn"
+            aria-label={`Select color ${color.name}${idx < 9 ? ` (Key ${idx + 1})` : ''}`}
+            aria-keyshortcuts={idx < 9 ? `${idx + 1}` : undefined}
             style={{
               ['--btn-color' as string]: color.hex,
-              ['--btn-glow' as string]: color.glow
+              ['--btn-glow' as string]: color.glow,
+              minHeight: btnHeight,
+              height: btnHeight,
+              fontSize: btnFontSize,
+              gap: colorCount >= 13 ? '5px' : '8px',
+              padding: colorCount >= 21 ? '0 4px' : '0 8px',
+              borderRadius: colorCount >= 21 ? '10px' : '14px'
             }}
           >
-            <div className="color-indicator-dot" />
-            <span>{color.name}</span>
+            <div
+              className="color-indicator-dot"
+              style={{
+                width: dotSize,
+                height: dotSize
+              }}
+            />
+            <span style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {color.name}
+            </span>
           </button>
         ))}
       </div>

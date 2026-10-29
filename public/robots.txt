@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://color-chaos.vercel.app/sitemap.xml
