@@ -21,15 +21,15 @@ const FAQS: FAQItem[] = [
   },
   {
     q: 'How do I play COLOR CHAOS?',
-    a: 'Each question shows a color word in mismatched ink (such as the word "RED" written in green ink). Your goal is to tap the button matching the ink color (Green), not the word meaning (Red). Round timer is 30 seconds.'
+    a: 'Each question shows a color word in mismatched ink (such as the word "RED" written in green ink). Your goal is to tap the button matching the ink color (Green), not the word meaning (Red). Round timer is 30 seconds for levels 1–20, expanding up to 42 seconds for higher levels.'
   },
   {
     q: 'How many levels are there?',
-    a: 'There are 50 progressive levels. Color counts start at 5 colors on Level 1 and scale up to 30 subtle neon colors on Level 50, accompanied by increasing speed and higher target score thresholds.'
+    a: 'There are 50 progressive levels. Color counts start at 5 colors on Level 1 and scale up to 30 subtle neon colors on Level 50, balanced with extra round time (up to 42s) and reduced wrong-answer penalties (softening from -2.0s down to -0.5s).'
   },
   {
     q: 'Does COLOR CHAOS save my progress?',
-    a: 'Yes. Your highest unlocked level, level-by-level high scores, overall personal best, completed levels, and daily streak are automatically saved in your browser’s localStorage. Note that clearing your browser site data will reset your saved progress.'
+    a: 'Yes. Your highest unlocked level, level-by-level high scores, overall personal best, completed levels, and daily streak are automatically saved in your browser’s localStorage. Quitting an in-progress round safely preserves all your saved high scores and unlocked levels.'
   },
   {
     q: 'Can I play on mobile?',
@@ -186,10 +186,11 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         </div>
 
         <ul style={{ paddingLeft: '18px', fontSize: '0.88rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <li><strong>30-Second Rounds:</strong> Race against the countdown timer to reach each level’s target score.</li>
+          <li><strong>Round Timers:</strong> 30 seconds for levels 1–20, expanding up to 42 seconds at higher levels to keep high-color rounds exciting and achievable.</li>
           <li><strong>+10 Points:</strong> Awarded for every correct color match.</li>
           <li><strong>Streak Bonuses:</strong> Every 5 consecutive correct answers triggers a massive <strong>+50 pts bonus</strong>!</li>
-          <li><strong style={{ color: '#FF3366' }}>-2s Penalty:</strong> Mistaken taps deduct 2 seconds from your clock and reset your combo streak.</li>
+          <li><strong style={{ color: '#FF3366' }}>Wrong Tap Penalty:</strong> -2.0s penalty on levels 1–20, gradually softened down to -0.5s on elite levels so mistakes aren't game-ending.</li>
+          <li><strong>In-Game Quit Option:</strong> Tap the exit button anytime during a match to pause and return to menu safely without losing your permanent records.</li>
         </ul>
       </section>
 
@@ -233,11 +234,80 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#B026FF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CheckCircle2 size={18} color="#B026FF" />
-          50 Progressive Levels
+          50 Progressive Levels & Difficulty Balancing
         </h2>
         <p style={{ fontSize: '0.88rem', color: '#CBD5E1', marginBottom: '10px' }}>
-          The campaign spans 50 handcrafted stages. You start with 5 easily distinguishable primary colors on Level 1, gradually progressing to 30 subtle neon hues on Level 50.
+          The campaign spans 50 handcrafted stages. You start with 5 easily distinguishable primary colors on Level 1, gradually progressing to 30 subtle neon hues on Level 50. To balance difficulty at higher levels, players receive bonus round time and softened mistake penalties:
         </p>
+
+        {/* Level Progression Table */}
+        <div style={{
+          overflowX: 'auto',
+          margin: '12px 0',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontSize: '0.78rem',
+            textAlign: 'left'
+          }}>
+            <thead>
+              <tr style={{ background: 'rgba(255, 255, 255, 0.06)', color: '#00E5FF' }}>
+                <th style={{ padding: '8px 10px' }}>Levels</th>
+                <th style={{ padding: '8px 10px' }}>Colors</th>
+                <th style={{ padding: '8px 10px' }}>Time</th>
+                <th style={{ padding: '8px 10px' }}>Wrong Penalty</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <td style={{ padding: '6px 10px', fontWeight: 700 }}>1–20</td>
+                <td style={{ padding: '6px 10px' }}>5 to 14 colors</td>
+                <td style={{ padding: '6px 10px', color: '#00E5FF' }}>30s</td>
+                <td style={{ padding: '6px 10px', color: '#FF3366' }}>-2.0s</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <td style={{ padding: '6px 10px', fontWeight: 700 }}>21–25</td>
+                <td style={{ padding: '6px 10px' }}>15 to 17 colors</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>32s (+2s)</td>
+                <td style={{ padding: '6px 10px', color: '#FF7700' }}>-1.5s</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <td style={{ padding: '6px 10px', fontWeight: 700 }}>26–30</td>
+                <td style={{ padding: '6px 10px' }}>17 to 19 colors</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>34s (+4s)</td>
+                <td style={{ padding: '6px 10px', color: '#FF7700' }}>-1.0s</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <td style={{ padding: '6px 10px', fontWeight: 700 }}>31–35</td>
+                <td style={{ padding: '6px 10px' }}>20 to 22 colors</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>36s (+6s)</td>
+                <td style={{ padding: '6px 10px', color: '#FFE600' }}>-0.8s</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <td style={{ padding: '6px 10px', fontWeight: 700 }}>36–40</td>
+                <td style={{ padding: '6px 10px' }}>22 to 24 colors</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>38s (+8s)</td>
+                <td style={{ padding: '6px 10px', color: '#FFE600' }}>-0.7s</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <td style={{ padding: '6px 10px', fontWeight: 700 }}>41–45</td>
+                <td style={{ padding: '6px 10px' }}>25 to 27 colors</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>40s (+10s)</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>-0.6s</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '6px 10px', fontWeight: 700 }}>46–50</td>
+                <td style={{ padding: '6px 10px' }}>27 to 30 colors</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>42s (+12s)</td>
+                <td style={{ padding: '6px 10px', color: '#00FF88' }}>-0.5s (min)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.84rem', color: '#94A3B8' }}>
           <div>• <strong>Levels 1–16:</strong> 5 to 12 colors across distinct primary hue families.</div>
           <div>• <strong>Levels 17–34:</strong> 13 to 21 colors introducing neighboring shades (Red vs Coral, Cyan vs Blue).</div>

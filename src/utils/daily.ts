@@ -64,7 +64,9 @@ export function getDailyChallengeConfig(dateStr: string = getTodayDateString()):
       targetScore,
       speedMultiplier,
       similarityTier: 2,
-      colorIds
+      colorIds,
+      totalTime: 30,     // Daily challenge always 30 seconds
+      wrongPenalty: 2     // Daily challenge uses standard 2s penalty
     }
   };
 }

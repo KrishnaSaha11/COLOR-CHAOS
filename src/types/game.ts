@@ -14,7 +14,15 @@ export interface Question {
   textColor: string;
 }
 
-export type GameState = 'HOME' | 'LEVEL_SELECT' | 'PLAYING' | 'RESULTS' | 'ABOUT';
+export type GameState =
+  | 'HOME'
+  | 'LEVEL_SELECT'
+  | 'PLAYING'
+  | 'RESULTS'
+  | 'ABOUT'
+  | 'MULTIPLAYER_LOBBY'
+  | 'MULTIPLAYER_PLAYING'
+  | 'MULTIPLAYER_RESULTS';
 
 export type GameMode = 'LEVEL' | 'DAILY';
 
@@ -33,6 +41,8 @@ export interface LevelConfig {
   speedMultiplier: number;
   similarityTier: 1 | 2 | 3; // 1 = Easy/Distinct, 2 = Medium/Related, 3 = Advanced/Subtle
   colorIds: string[];
+  totalTime: number;      // Total round time in seconds (scales with level)
+  wrongPenalty: number;    // Time penalty in seconds for wrong answer (decreases at higher levels)
 }
 
 export interface UserProgress {

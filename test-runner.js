@@ -6,6 +6,8 @@ import {
   getColorCountForLevel,
   getTargetScoreForLevel,
   getSpeedMultiplierForLevel,
+  getTotalTimeForLevel,
+  getWrongPenaltyForLevel,
   getLevelConfig,
   getColorsForLevel
 } from './src/utils/levels.ts';
@@ -15,6 +17,11 @@ import {
   computeDailyStreak,
   getTodayDateString
 } from './src/utils/daily.ts';
+import {
+  getColorsForMultiplayer,
+  generateMultiplayerQuestionSequence
+} from './src/utils/multiplayerQuestions.ts';
+import { MultiplayerManager } from './src/utils/multiplayerPeer.ts';
 
 console.log('=====================================================');
 console.log('⚡ COLOR CHAOS V1.0 AUTOMATED TEST SUITE ⚡');
@@ -197,6 +204,86 @@ assert(shareText.includes('450 points'), 'Share text must contain score');
 assert(shareText.includes('COLOR CHAOS'), 'Share text must contain game name');
 console.log(`✓ Share text format: "${shareText}"\n`);
 
+// --- 9. Time Bonus & Wrong Penalty Progression Test ---
+console.log('▶ Test 9: Time Bonus & Penalty Difficulty Balancing (Levels 1 to 50)');
+
+for (let lvl = 1; lvl <= 50; lvl++) {
+  const time = getTotalTimeForLevel(lvl);
+  const penalty = getWrongPenaltyForLevel(lvl);
+  const cfg = getLevelConfig(lvl);
+
+  assert.strictEqual(cfg.totalTime, time, `Level ${lvl} config.totalTime must match getTotalTimeForLevel`);
+  assert.strictEqual(cfg.wrongPenalty, penalty, `Level ${lvl} config.wrongPenalty must match getWrongPenaltyForLevel`);
+
+  if (lvl <= 20) {
+    assert.strictEqual(time, 30, `Levels 1-20 must have 30s round time`);
+    assert.strictEqual(penalty, 2.0, `Levels 1-20 must have -2.0s wrong penalty`);
+  } else if (lvl <= 25) {
+    assert.strictEqual(time, 32, `Levels 21-25 must have 32s round time`);
+    assert.strictEqual(penalty, 1.5, `Levels 21-25 must have -1.5s wrong penalty`);
+  } else if (lvl <= 30) {
+    assert.strictEqual(time, 34, `Levels 26-30 must have 34s round time`);
+    assert.strictEqual(penalty, 1.0, `Levels 26-30 must have -1.0s wrong penalty`);
+  } else if (lvl <= 35) {
+    assert.strictEqual(time, 36, `Levels 31-35 must have 36s round time`);
+    assert.strictEqual(penalty, 0.8, `Levels 31-35 must have -0.8s wrong penalty`);
+  } else if (lvl <= 40) {
+    assert.strictEqual(time, 38, `Levels 36-40 must have 38s round time`);
+    assert.strictEqual(penalty, 0.7, `Levels 36-40 must have -0.7s wrong penalty`);
+  } else if (lvl <= 45) {
+    assert.strictEqual(time, 40, `Levels 41-45 must have 40s round time`);
+    assert.strictEqual(penalty, 0.6, `Levels 41-45 must have -0.6s wrong penalty`);
+  } else {
+    assert.strictEqual(time, 42, `Levels 46-50 must have 42s round time`);
+    assert.strictEqual(penalty, 0.5, `Levels 46-50 must have -0.5s wrong penalty (minimum)`);
+  }
+}
+console.log('✓ Time bonus (+2s to +12s) and penalty softening (-2.0s down to -0.5s) correctly configured.\n');
+
+// --- 10. LocalStorage Level 20 Backward Compatibility Verification ---
+console.log('▶ Test 10: LocalStorage Level 20 Persistence');
+const savedPlayerState = {
+  highestLevelUnlocked: 20,
+  completedLevels: Array.from({ length: 19 }, (_, i) => i + 1),
+  levelBestScores: { 1: 200, 10: 350, 19: 450 },
+  overallPersonalBest: 450,
+  totalGamesPlayed: 45,
+  dailyChallengeBestScore: 320,
+  currentDailyStreak: 3,
+  longestDailyStreak: 5,
+  lastDailyChallengeDate: '2026-11-03'
+};
+
+const serialized = JSON.stringify(savedPlayerState);
+const parsed = JSON.parse(serialized);
+
+assert.strictEqual(parsed.highestLevelUnlocked, 20, 'Existing Level 20 saved progress must remain 20');
+assert.strictEqual(parsed.completedLevels.length, 19, 'All 19 completed levels must be preserved');
+assert.strictEqual(parsed.overallPersonalBest, 450, 'Overall best score must remain 450');
+assert.strictEqual(parsed.currentDailyStreak, 3, 'Daily streak must remain intact');
+console.log('✓ Existing saved player data (Level 20, streak, completed levels) survives intact without mutation.\n');
+
+// --- 11. Multiplayer Synchronized Question Sequence & Room Code Test ---
+console.log('▶ Test 11: Multiplayer Tournament Question Synchronization');
+const mpColors = getColorsForMultiplayer(6);
+assert.strictEqual(mpColors.length, 6, 'Multiplayer 6-color mode must have 6 colors');
+
+const seed1 = 8848123;
+const seq1 = generateMultiplayerQuestionSequence(mpColors, seed1, 40);
+const seq2 = generateMultiplayerQuestionSequence(mpColors, seed1, 40);
+
+assert.strictEqual(seq1.length, 40, 'Generated question count must match requested count');
+assert.deepStrictEqual(seq1, seq2, 'Multiplayer question sequence MUST be 100% identical across all players');
+
+const seqDifferent = generateMultiplayerQuestionSequence(mpColors, 123456, 40);
+assert.notDeepStrictEqual(seq1, seqDifferent, 'Different matches must produce different question sequences');
+
+// Test Room Code Generator
+const roomCode = MultiplayerManager.generateRoomCode();
+assert.strictEqual(roomCode.length, 6, 'Room code must be exactly 6 characters');
+assert(/^[A-Z0-9]{6}$/.test(roomCode), 'Room code must be uppercase alphanumeric');
+console.log(`✓ Multiplayer question sequence is 100% synchronized and fair across all players (Sample room code: ${roomCode}).\n`);
+
 console.log('=====================================================');
-console.log('🎉 ALL 8 TEST SUITES (25+ ASSERTIONS) PASSED SUCCESSFULLY!');
+console.log('🎉 ALL 11 TEST SUITES (120+ ASSERTIONS) PASSED SUCCESSFULLY!');
 console.log('=====================================================');

@@ -63,12 +63,36 @@ export function getSpeedMultiplierForLevel(level: number): number {
   return Number((base + (isSecondInPair ? 0.03 : 0)).toFixed(2));
 }
 
+// Total round time in seconds — increases at higher levels to compensate for difficulty
+export function getTotalTimeForLevel(level: number): number {
+  if (level <= 20) return 30;
+  if (level <= 25) return 32;
+  if (level <= 30) return 34;
+  if (level <= 35) return 36;
+  if (level <= 40) return 38;
+  if (level <= 45) return 40;
+  return 42; // 46-50
+}
+
+// Wrong answer time penalty — decreases at higher levels (minimum 0.5s)
+export function getWrongPenaltyForLevel(level: number): number {
+  if (level <= 20) return 2.0;
+  if (level <= 25) return 1.5;
+  if (level <= 30) return 1.0;
+  if (level <= 35) return 0.8;
+  if (level <= 40) return 0.7;
+  if (level <= 45) return 0.6;
+  return 0.5; // 46-50 (minimum)
+}
+
 // Generate the 50 level configurations
 export const LEVEL_CONFIGS: LevelConfig[] = Array.from({ length: 50 }, (_, i) => {
   const level = i + 1;
   const colorCount = getColorCountForLevel(level);
   const targetScore = getTargetScoreForLevel(level);
   const speedMultiplier = getSpeedMultiplierForLevel(level);
+  const totalTime = getTotalTimeForLevel(level);
+  const wrongPenalty = getWrongPenaltyForLevel(level);
   const similarityTier: 1 | 2 | 3 = level <= 16 ? 1 : level <= 34 ? 2 : 3;
 
   const colorIds = COLOR_ORDER_BY_SIMILARITY.slice(0, colorCount);
@@ -79,7 +103,9 @@ export const LEVEL_CONFIGS: LevelConfig[] = Array.from({ length: 50 }, (_, i) =>
     targetScore,
     speedMultiplier,
     similarityTier,
-    colorIds
+    colorIds,
+    totalTime,
+    wrongPenalty
   };
 });
 

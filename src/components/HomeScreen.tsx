@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Play, Zap, HelpCircle, Trophy, Flame, Grid, Calendar, Clock, ArrowRight } from 'lucide-react';
+import { Volume2, VolumeX, Play, Zap, HelpCircle, Trophy, Flame, Grid, Calendar, Clock, ArrowRight, Users } from 'lucide-react';
 import { isSoundEnabled, toggleSound, playTap } from '../utils/sound';
 import { UserProgress } from '../types/game';
 import { getTimeUntilMidnight, getTodayDateString } from '../utils/daily';
@@ -10,6 +10,7 @@ interface HomeScreenProps {
   onStartDaily: () => void;
   onOpenLevelSelect: () => void;
   onOpenAbout: () => void;
+  onOpenMultiplayer: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -17,7 +18,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onStartLevel,
   onStartDaily,
   onOpenLevelSelect,
-  onOpenAbout
+  onOpenAbout,
+  onOpenMultiplayer
 }) => {
   const [soundOn, setSoundOn] = useState<boolean>(isSoundEnabled());
   const [showHowTo, setShowHowTo] = useState<boolean>(false);
@@ -235,11 +237,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             maxWidth: '360px',
             fontSize: '1.25rem',
             padding: '18px 28px',
-            marginBottom: '14px'
+            marginBottom: '10px'
           }}
         >
           <Play fill="#FFFFFF" size={22} />
           <span>PLAY LEVEL {highestLevelUnlocked}</span>
+        </button>
+
+        {/* Play With Friends Multiplayer Button */}
+        <button
+          onClick={() => {
+            playTap();
+            onOpenMultiplayer();
+          }}
+          className="btn-secondary"
+          style={{
+            width: '100%',
+            maxWidth: '360px',
+            fontSize: '1.05rem',
+            padding: '13px 20px',
+            marginBottom: '12px',
+            background: 'linear-gradient(135deg, rgba(176, 38, 255, 0.22) 0%, rgba(0, 229, 255, 0.22) 100%)',
+            borderColor: 'rgba(0, 229, 255, 0.45)',
+            color: '#FFFFFF',
+            boxShadow: '0 0 18px rgba(0, 229, 255, 0.2)'
+          }}
+        >
+          <Users size={19} color="#00E5FF" />
+          <span style={{ fontWeight: 800 }}>PLAY WITH FRIENDS (2–5)</span>
         </button>
 
         {/* Daily Challenge Interactive Card */}
@@ -406,9 +431,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
             <ul style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <li><strong>50 Levels:</strong> Reach target score to unlock the next level.</li>
+              <li><strong>Time Bonus:</strong> Levels 21+ get extra time (up to 42s) to tackle high color counts!</li>
+              <li><strong>Balanced Penalties:</strong> Wrong tap penalty softens from -2.0s down to -0.5s at higher levels.</li>
               <li><strong>Daily Challenge:</strong> Play every day to build your Daily Streak!</li>
-              <li><strong>Color Similarity:</strong> Colors get trickier and closer as you climb.</li>
-              <li><strong style={{ color: '#FF3366' }}>-2s Penalty:</strong> Wrong taps cost 2 seconds!</li>
+              <li><strong>Quit Option:</strong> Safe exit anytime during a match without losing best scores.</li>
             </ul>
 
             <div style={{ textAlign: 'center', marginTop: '10px' }}>
