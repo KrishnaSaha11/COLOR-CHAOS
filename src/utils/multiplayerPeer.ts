@@ -481,8 +481,12 @@ export class MultiplayerManager {
       { qos: 1 }
     );
 
-    if (this.onStateUpdate) this.onStateUpdate(this.roomState);
-    if (this.onCountdown) this.onCountdown(countdownStartMs, gameStartMs);
+    // Slight lead-time delay (120ms) allows the MQTT broker to relay the packet to guest(s)
+    // so all devices mount the gameplay screen and begin countdown in perfect sync!
+    setTimeout(() => {
+      if (this.onStateUpdate && this.roomState) this.onStateUpdate(this.roomState);
+      if (this.onCountdown) this.onCountdown(countdownStartMs, gameStartMs);
+    }, 120);
 
     setTimeout(() => {
       if (this.roomState && this.roomState.status === 'COUNTDOWN') {

@@ -24,7 +24,6 @@ export const MultiplayerGameplay: React.FC<MultiplayerGameplayProps> = ({
   const [roundDuration] = useState(() => roomState.settings.duration);
   const [availableColors] = useState(() => getColorsForMultiplayer(roomState.settings.colorCount));
   const [questions] = useState(() => roomState.questions);
-  const [gameStartMs] = useState(() => roomState.gameStartMs || Date.now() + 3200);
 
   // Countdown state before gameplay begins (3... 2... 1... GO!)
   const [countdownText, setCountdownText] = useState<string>('3');
@@ -84,13 +83,19 @@ export const MultiplayerGameplay: React.FC<MultiplayerGameplayProps> = ({
     }
   }, [manager]);
 
-  // ★ COUNTDOWN EFFECT — uses the locally-anchored gameStartMs
-  //   (Guest already re-anchored to its own clock in the PeerMessage handler)
+  // ★ COUNTDOWN EFFECT — Uses monotonic performance.now()
+  //   Guarantees exact 3.0s (3... 2... 1... GO!) countdown on both Host & Guest,
+  //   completely immune to OS clock drift between phone and laptop!
   useEffect(() => {
-    if (countdownDoneRef.current) return; // already completed
+    if (countdownDoneRef.current) return;
+
+    const startPerf = performance.now();
+    const TOTAL_COUNTDOWN_MS = 3000;
 
     const check = () => {
-      const remainingMs = gameStartMs - Date.now();
+      const elapsed = performance.now() - startPerf;
+      const remainingMs = TOTAL_COUNTDOWN_MS - elapsed;
+
       if (remainingMs > 2000) {
         setCountdownText('3');
       } else if (remainingMs > 1000) {
@@ -102,23 +107,23 @@ export const MultiplayerGameplay: React.FC<MultiplayerGameplayProps> = ({
         setCountdownText('GO!');
         if (!countdownDoneRef.current) {
           countdownDoneRef.current = true;
-          setTimeout(() => setIsCountingDown(false), 400);
+          setTimeout(() => setIsCountingDown(false), 250);
         }
-        return true; // signal done
+        return true;
       }
       return false;
     };
 
-    if (check()) return; // already past start time on mount
+    if (check()) return;
 
     const interval = setInterval(() => {
       if (check()) {
         clearInterval(interval);
       }
-    }, 80);
+    }, 50);
 
     return () => clearInterval(interval);
-  }, [gameStartMs]); // gameStartMs is frozen at mount via useState
+  }, []);
 
   // ★ MAIN GAME TIMER — starts precisely when isCountingDown becomes false.
   //   Uses performance.now() anchored once. Completely immune to re-renders.
