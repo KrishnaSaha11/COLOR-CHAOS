@@ -24,6 +24,7 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
   const winner = rankedPlayers[0];
   const isMeWinner = winner && winner.id === manager.myId;
   const isHost = manager.isHost;
+  const allFinished = roomState.status === 'RESULTS' || playersList.every((p) => p.hasFinished);
 
   // 1.5s tap-lockout guard: prevents hand-momentum misclicks from fast gameplay tapping
   const [canInteract, setCanInteract] = useState(false);
@@ -46,20 +47,22 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
   }, []);
 
   useEffect(() => {
-    playGameOver(isMeWinner);
-    if (isMeWinner) {
-      try {
-        confetti({
-          particleCount: 200,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#FFE600', '#FF7700', '#00E5FF', '#00FF88', '#B026FF']
-        });
-      } catch {
-        // ignore
+    if (allFinished) {
+      playGameOver(isMeWinner);
+      if (isMeWinner) {
+        try {
+          confetti({
+            particleCount: 200,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#FFE600', '#FF7700', '#00E5FF', '#00FF88', '#B026FF']
+          });
+        } catch {
+          // ignore
+        }
       }
     }
-  }, [isMeWinner]);
+  }, [allFinished, isMeWinner]);
 
   return (
     <div style={{
@@ -80,14 +83,22 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
           gap: '8px',
           padding: '6px 16px',
           borderRadius: '999px',
-          background: 'linear-gradient(135deg, rgba(255, 230, 0, 0.2), rgba(255, 119, 0, 0.2))',
-          border: '1px solid #FFE600',
-          boxShadow: '0 0 20px rgba(255, 230, 0, 0.4)',
+          background: allFinished
+            ? 'linear-gradient(135deg, rgba(255, 230, 0, 0.2), rgba(255, 119, 0, 0.2))'
+            : 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(176, 38, 255, 0.2))',
+          border: allFinished ? '1px solid #FFE600' : '1px solid #00E5FF',
+          boxShadow: allFinished ? '0 0 20px rgba(255, 230, 0, 0.4)' : '0 0 20px rgba(0, 229, 255, 0.4)',
           marginBottom: '8px'
         }}>
-          <Crown size={16} color="#FFE600" />
-          <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#FFE600', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            MATCH COMPLETE
+          {allFinished ? <Crown size={16} color="#FFE600" /> : <span style={{ fontSize: '13px' }}>⏳</span>}
+          <span style={{
+            fontSize: '0.82rem',
+            fontWeight: 900,
+            color: allFinished ? '#FFE600' : '#00E5FF',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em'
+          }}>
+            {allFinished ? 'MATCH COMPLETE' : 'WAITING FOR PLAYERS TO FINISH...'}
           </span>
         </div>
 
@@ -96,14 +107,18 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
           fontWeight: 900,
           textTransform: 'uppercase',
           margin: 0,
-          background: isMeWinner
+          background: !allFinished
+            ? 'linear-gradient(135deg, #FFFFFF 0%, #00E5FF 100%)'
+            : isMeWinner
             ? 'linear-gradient(135deg, #FFE600 0%, #FF7700 50%, #00FF88 100%)'
             : 'linear-gradient(135deg, #FFFFFF 0%, #00E5FF 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          filter: isMeWinner ? 'drop-shadow(0 0 20px rgba(255, 230, 0, 0.5))' : 'drop-shadow(0 0 15px rgba(0, 229, 255, 0.4))'
+          filter: allFinished && isMeWinner
+            ? 'drop-shadow(0 0 20px rgba(255, 230, 0, 0.5))'
+            : 'drop-shadow(0 0 15px rgba(0, 229, 255, 0.4))'
         }}>
-          {isMeWinner ? '🏆 YOU WON!' : `${winner?.name} WINS!`}
+          {!allFinished ? 'FINISHING UP...' : isMeWinner ? '🏆 YOU WON!' : `${winner?.name} WINS!`}
         </h1>
       </div>
 
@@ -180,6 +195,11 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
                     {isMe && (
                       <span style={{ fontSize: '0.65rem', color: '#00E5FF', fontWeight: 800 }}>(You)</span>
                     )}
+                    {player.hasFinished ? (
+                      <span style={{ fontSize: '0.62rem', color: '#00FF88', fontWeight: 800 }}>✓ Done</span>
+                    ) : (
+                      <span style={{ fontSize: '0.62rem', color: '#FFE600', fontWeight: 800 }}>⚡ Playing...</span>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.68rem', color: '#8C94B2', marginTop: '2px' }}>
@@ -255,9 +275,9 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
             </div>
           ) : (
             <button
-              disabled={!canInteract}
+              disabled={!canInteract || !allFinished}
               onClick={() => {
-                if (!canInteract) return;
+                if (!canInteract || !allFinished) return;
                 playTap();
                 onRematch();
               }}
@@ -266,14 +286,16 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
                 width: '100%',
                 padding: '16px',
                 fontSize: '1.15rem',
-                opacity: canInteract ? 1 : 0.65,
-                cursor: canInteract ? 'pointer' : 'not-allowed',
+                opacity: canInteract && allFinished ? 1 : 0.65,
+                cursor: canInteract && allFinished ? 'pointer' : 'not-allowed',
                 transition: 'opacity 0.25s ease'
               }}
             >
               <RotateCcw size={20} />
               <span>
-                {canInteract
+                {!allFinished
+                  ? 'WAITING FOR PLAYERS TO FINISH...'
+                  : canInteract
                   ? `PLAY AGAIN / REMATCH (${playersList.length} PLAYERS)`
                   : `MATCH COMPLETE (${lockoutRemaining}s)...`}
               </span>
@@ -290,7 +312,7 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
             fontSize: '0.85rem',
             fontWeight: 800
           }}>
-            ⏳ Waiting for Host to start rematch...
+            {!allFinished ? '⏳ Other players are finishing up...' : '⏳ Waiting for Host to start rematch...'}
           </div>
         )}
 

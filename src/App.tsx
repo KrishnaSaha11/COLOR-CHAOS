@@ -68,7 +68,10 @@ export function App() {
         });
       } else if (state.status === 'COUNTDOWN' || state.status === 'PLAYING') {
         setGameState((prev) => {
-          // Only transition TO gameplay if not already there
+          // ★ CRITICAL FIX: If this player has already completed this match and is
+          //   viewing MULTIPLAYER_RESULTS, do NOT yank them back into MULTIPLAYER_PLAYING
+          //   just because other players in the room still have a couple seconds remaining!
+          if (prev === 'MULTIPLAYER_RESULTS') return prev;
           if (prev !== 'MULTIPLAYER_PLAYING') return 'MULTIPLAYER_PLAYING';
           return prev;
         });
