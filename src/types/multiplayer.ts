@@ -36,7 +36,7 @@ export type PeerMessage =
   | { type: 'JOIN_REJECTED'; reason: string }
   | { type: 'ROOM_UPDATE'; roomState: RoomState }
   | { type: 'SETTINGS_UPDATE'; settings: MultiplayerSettings }
-  | { type: 'START_COUNTDOWN'; countdownStartMs: number; gameStartMs: number; questions: Question[] }
+  | { type: 'START_COUNTDOWN'; countdownStartMs: number; gameStartMs: number; questions?: Question[]; seed?: number }
   | { type: 'SCORE_UPDATE'; playerId: string; score: number; streak: number; correct: boolean }
   | { type: 'PLAYER_FINISHED'; playerId: string; finalScore: number; longestStreak: number; correctCount: number; wrongCount: number }
   | { type: 'REMATCH' }

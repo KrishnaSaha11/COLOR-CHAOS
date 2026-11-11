@@ -13,6 +13,7 @@ export class MultiplayerManager {
   private client: MqttClient | null = null;
   private currentRoomCode: string = '';
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private pendingHostCountdownTrigger: (() => void) | null = null;
 
   public isHost: boolean = false;
   public myId: string = '';
@@ -274,6 +275,15 @@ export class MultiplayerManager {
   private handleHostIncoming(topic: string, msg: PeerMessage & { playerId?: string; name?: string }) {
     if (!this.roomState || !this.client?.connected) return;
 
+    if (msg.type === 'START_COUNTDOWN') {
+      // Received broadcast echo from broker — trigger Host countdown in exact sync with Guest
+      if (this.pendingHostCountdownTrigger) {
+        this.pendingHostCountdownTrigger();
+        this.pendingHostCountdownTrigger = null;
+      }
+      return;
+    }
+
     if (msg.type === 'JOIN_REQUEST' && topic.endsWith('/host')) {
       const currentPlayers = Object.keys(this.roomState.players);
       const guestId = msg.playerId || `g_${Date.now()}`;
@@ -375,16 +385,22 @@ export class MultiplayerManager {
     } else if (msg.type === 'START_COUNTDOWN') {
       if (this.roomState) {
         this.roomState.status = 'COUNTDOWN';
-        this.roomState.questions = msg.questions;
-        const countdownDuration = msg.gameStartMs - msg.countdownStartMs;
+        // Generate synchronized questions from seed or use questions array
+        if (msg.seed) {
+          const colors = getColorsForMultiplayer(this.roomState.settings.colorCount);
+          this.roomState.questions = generateMultiplayerQuestionSequence(colors, msg.seed, 120);
+        } else if (msg.questions) {
+          this.roomState.questions = msg.questions;
+        }
+
         const now = Date.now();
         this.roomState.countdownStartMs = now;
-        this.roomState.gameStartMs = now + countdownDuration;
+        this.roomState.gameStartMs = now + 3000;
 
         if (this.onStateUpdate) this.onStateUpdate(this.roomState);
       }
       if (this.onCountdown) {
-        this.onCountdown(Date.now(), Date.now() + 3200);
+        this.onCountdown(Date.now(), Date.now() + 3000);
       }
     } else if (msg.type === 'REMATCH') {
       if (this.roomState) {
@@ -472,21 +488,32 @@ export class MultiplayerManager {
       type: 'START_COUNTDOWN',
       countdownStartMs,
       gameStartMs,
+      seed,
       questions
     };
 
+    let hostStarted = false;
+    const triggerHost = () => {
+      if (hostStarted) return;
+      hostStarted = true;
+      if (this.onStateUpdate && this.roomState) this.onStateUpdate(this.roomState);
+      if (this.onCountdown) this.onCountdown(countdownStartMs, gameStartMs);
+    };
+
+    // Store trigger so handleHostIncoming executes it when the broker broadcasts the packet back
+    this.pendingHostCountdownTrigger = triggerHost;
+
+    // Publish to all subscribers in the room
     this.client.publish(
       `cchaos/v1/${this.currentRoomCode}/all`,
       JSON.stringify(startMsg),
       { qos: 1 }
     );
 
-    // Slight lead-time delay (120ms) allows the MQTT broker to relay the packet to guest(s)
-    // so all devices mount the gameplay screen and begin countdown in perfect sync!
+    // Fallback: If broker does not loop back to host within 200ms, start anyway
     setTimeout(() => {
-      if (this.onStateUpdate && this.roomState) this.onStateUpdate(this.roomState);
-      if (this.onCountdown) this.onCountdown(countdownStartMs, gameStartMs);
-    }, 120);
+      triggerHost();
+    }, 200);
 
     setTimeout(() => {
       if (this.roomState && this.roomState.status === 'COUNTDOWN') {
