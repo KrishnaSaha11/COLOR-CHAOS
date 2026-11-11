@@ -107,18 +107,25 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
           fontWeight: 900,
           textTransform: 'uppercase',
           margin: 0,
-          background: !allFinished
-            ? 'linear-gradient(135deg, #FFFFFF 0%, #00E5FF 100%)'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          color: !allFinished
+            ? '#00E5FF'
             : isMeWinner
-            ? 'linear-gradient(135deg, #FFE600 0%, #FF7700 50%, #00FF88 100%)'
-            : 'linear-gradient(135deg, #FFFFFF 0%, #00E5FF 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          filter: allFinished && isMeWinner
-            ? 'drop-shadow(0 0 20px rgba(255, 230, 0, 0.5))'
-            : 'drop-shadow(0 0 15px rgba(0, 229, 255, 0.4))'
+            ? '#FFE600'
+            : '#FFFFFF',
+          textShadow: !allFinished
+            ? '0 0 25px rgba(0, 229, 255, 0.7), 0 2px 4px rgba(0, 0, 0, 0.8)'
+            : isMeWinner
+            ? '0 0 25px rgba(255, 230, 0, 0.85), 0 0 50px rgba(255, 119, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.9)'
+            : '0 0 20px rgba(0, 229, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8)'
         }}>
-          {!allFinished ? 'FINISHING UP...' : isMeWinner ? '🏆 YOU WON!' : `${winner?.name} WINS!`}
+          {allFinished && isMeWinner && (
+            <span style={{ filter: 'drop-shadow(0 0 12px rgba(255, 230, 0, 0.6))' }}>🏆</span>
+          )}
+          <span>{!allFinished ? 'FINISHING UP...' : isMeWinner ? 'YOU WON!' : `${winner?.name} WINS!`}</span>
         </h1>
       </div>
 

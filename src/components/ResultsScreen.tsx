@@ -207,14 +207,16 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           letterSpacing: '0.04em',
           textTransform: 'uppercase',
           margin: 0,
-          background: isLevel50Victory
-            ? 'linear-gradient(135deg, #FFE600 0%, #FF7700 50%, #B026FF 100%)'
+          color: isLevel50Victory
+            ? '#FFE600'
             : passedTarget
-            ? 'linear-gradient(135deg, #FFFFFF 0%, #00FF88 100%)'
-            : 'linear-gradient(135deg, #FFFFFF 0%, #FF3366 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          filter: passedTarget ? 'drop-shadow(0 0 20px rgba(0, 255, 136, 0.5))' : 'drop-shadow(0 0 15px rgba(255, 51, 102, 0.4))'
+            ? '#00FF88'
+            : '#FF3366',
+          textShadow: isLevel50Victory
+            ? '0 0 25px rgba(255, 230, 0, 0.85), 0 0 50px rgba(255, 119, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.9)'
+            : passedTarget
+            ? '0 0 25px rgba(0, 255, 136, 0.75), 0 2px 4px rgba(0, 0, 0, 0.8)'
+            : '0 0 25px rgba(255, 51, 102, 0.75), 0 2px 4px rgba(0, 0, 0, 0.8)'
         }}>
           {isLevel50Victory ? 'YOU BEAT COLOR CHAOS!' : passedTarget ? 'VICTORY!' : 'LEVEL FAILED'}
         </h1>
