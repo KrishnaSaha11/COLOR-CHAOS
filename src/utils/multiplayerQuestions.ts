@@ -2,14 +2,47 @@ import { ColorDef, Question } from '../types/game';
 import { MASTER_COLORS, BASE_COLORS } from './colors';
 import { mulberry32 } from './daily';
 
-// Get subset of colors based on host settings
+// Get subset of colors based on host settings — curated for maximum visual distinction
 export function getColorsForMultiplayer(colorCount: 6 | 10 | 16): ColorDef[] {
+  // 6 Colors: Pure distinct primaries & secondaries (Zero ambiguity)
+  const colors6: ColorDef[] = [
+    MASTER_COLORS.RED,
+    MASTER_COLORS.BLUE,
+    MASTER_COLORS.GREEN,
+    MASTER_COLORS.YELLOW,
+    MASTER_COLORS.PURPLE,
+    MASTER_COLORS.ORANGE
+  ];
+
   if (colorCount === 6) {
-    return BASE_COLORS;
+    return colors6;
   }
-  
-  const allColors = Object.values(MASTER_COLORS);
-  return allColors.slice(0, colorCount);
+
+  // 10 Colors: 10 distinct vibrant hues across all families (Only 1 yellow, no confusing duplicates)
+  const colors10: ColorDef[] = [
+    ...colors6,
+    MASTER_COLORS.CYAN,
+    MASTER_COLORS.MAGENTA,
+    MASTER_COLORS.LIME,
+    MASTER_COLORS.CORAL
+  ];
+
+  if (colorCount === 10) {
+    return colors10;
+  }
+
+  // 16 Colors: 16 diverse high-contrast shades (No 3-yellow confusion)
+  const colors16: ColorDef[] = [
+    ...colors10,
+    MASTER_COLORS.TEAL,
+    MASTER_COLORS.VIOLET,
+    MASTER_COLORS.TANGERINE,
+    MASTER_COLORS.SKY,
+    MASTER_COLORS.MINT,
+    MASTER_COLORS.ROSE
+  ];
+
+  return colors16;
 }
 
 // Generate an identical deterministic sequence of questions using seed

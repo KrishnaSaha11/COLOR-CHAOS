@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RotateCcw, Home, Share2, Trophy, Flame, Zap, Check, ArrowRight, Grid, XCircle } from 'lucide-react';
 import { playTap } from '../utils/sound';
 
@@ -38,6 +38,16 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   onGoHome
 }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // 1.2s tap lockout guard to prevent accidental taps from fast gameplay
+  const [canInteract, setCanInteract] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCanInteract(true);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -349,17 +359,26 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: '10px',
-        marginTop: '10px'
+        marginTop: '10px',
+        opacity: canInteract ? 1 : 0.7,
+        transition: 'opacity 0.25s ease'
       }}>
         {/* Next Level (if passed and not daily and level < 50) */}
         {passedTarget && !isDaily && level < 50 && onPlayNextLevel && (
           <button
+            disabled={!canInteract}
             onClick={() => {
+              if (!canInteract) return;
               playTap();
               onPlayNextLevel();
             }}
             className="btn-primary"
-            style={{ width: '100%', padding: '16px 24px', fontSize: '1.2rem' }}
+            style={{
+              width: '100%',
+              padding: '16px 24px',
+              fontSize: '1.2rem',
+              cursor: canInteract ? 'pointer' : 'not-allowed'
+            }}
           >
             <span>NEXT LEVEL ({level + 1})</span>
             <ArrowRight size={20} />
@@ -368,7 +387,9 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
         {/* Retry / Replay Level */}
         <button
+          disabled={!canInteract}
           onClick={() => {
+            if (!canInteract) return;
             playTap();
             onRetryLevel();
           }}
@@ -376,7 +397,8 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
           style={{
             width: '100%',
             padding: passedTarget && !isDaily && level < 50 ? '14px 20px' : '16px 24px',
-            fontSize: passedTarget && !isDaily && level < 50 ? '1rem' : '1.2rem'
+            fontSize: passedTarget && !isDaily && level < 50 ? '1rem' : '1.2rem',
+            cursor: canInteract ? 'pointer' : 'not-allowed'
           }}
         >
           <RotateCcw size={20} />
@@ -386,25 +408,32 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         {/* Level Select & Share Row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <button
+            disabled={!canInteract}
             onClick={() => {
+              if (!canInteract) return;
               playTap();
               onGoLevelSelect();
             }}
             className="btn-secondary"
-            style={{ padding: '12px 14px' }}
+            style={{ padding: '12px 14px', cursor: canInteract ? 'pointer' : 'not-allowed' }}
           >
             <Grid size={16} />
             <span>LEVELS</span>
           </button>
 
           <button
-            onClick={handleShare}
+            disabled={!canInteract}
+            onClick={() => {
+              if (!canInteract) return;
+              handleShare();
+            }}
             className="btn-secondary"
             style={{
               padding: '12px 14px',
               background: 'linear-gradient(135deg, rgba(255, 51, 102, 0.15), rgba(176, 38, 255, 0.15))',
               borderColor: 'rgba(255, 51, 102, 0.4)',
-              color: '#FFFFFF'
+              color: '#FFFFFF',
+              cursor: canInteract ? 'pointer' : 'not-allowed'
             }}
           >
             <Share2 size={16} color="#FF3366" />
@@ -414,12 +443,14 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
         {/* Home Button */}
         <button
+          disabled={!canInteract}
           onClick={() => {
+            if (!canInteract) return;
             playTap();
             onGoHome();
           }}
           className="btn-secondary"
-          style={{ width: '100%', padding: '10px 16px', fontSize: '0.9rem' }}
+          style={{ width: '100%', padding: '10px 16px', fontSize: '0.9rem', cursor: canInteract ? 'pointer' : 'not-allowed' }}
         >
           <Home size={16} />
           <span>HOME</span>

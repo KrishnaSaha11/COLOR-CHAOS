@@ -31,16 +31,16 @@ export function getColorCountForLevel(level: number): number {
 }
 
 // Master ordered list of colors prioritized by similarity tier:
-// Early levels pick from diverse primaries first; later levels add subtle neighboring shades.
+// Early & mid levels use diverse, high-contrast colors across all 6 families without confusing duplicate shades.
 const COLOR_ORDER_BY_SIMILARITY: string[] = [
   // Primary diverse set (5-6)
   'RED', 'CYAN', 'GREEN', 'YELLOW', 'PURPLE', 'ORANGE',
-  // Tier 1 additions (7-12)
-  'LIME', 'MAGENTA', 'BLUE', 'GOLD', 'CORAL', 'TEAL',
-  // Tier 2 additions (13-20) - introduces neighboring family shades
-  'CRIMSON', 'MINT', 'AMBER', 'VIOLET', 'TANGERINE', 'SKY', 'ROSE', 'EMERALD',
-  // Tier 3 additions (21-30) - advanced subtle cousins
-  'LEMON', 'ORCHID', 'PEACH', 'AQUA', 'JADE', 'CANARY', 'INDIGO', 'FLAME', 'RUBY', 'APRICOT'
+  // Tier 1 additions (7-12) — distinct hues across families (no duplicate yellows)
+  'LIME', 'MAGENTA', 'BLUE', 'ROSE', 'CORAL', 'TEAL',
+  // Tier 2 additions (13-20) — richer secondary shades
+  'CRIMSON', 'MINT', 'SKY', 'VIOLET', 'TANGERINE', 'EMERALD', 'AQUA', 'GOLD',
+  // Tier 3 additions (21-30) — expert subtle shades reserved for master levels
+  'AMBER', 'LEMON', 'ORCHID', 'PEACH', 'JADE', 'CANARY', 'INDIGO', 'FLAME', 'RUBY', 'APRICOT'
 ];
 
 // Target score calibrated to be demanding yet achievable in 30 seconds

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Crown, Flame, RotateCcw, Home, Target } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MultiplayerManager } from '../utils/multiplayerPeer';
@@ -24,6 +24,26 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
   const winner = rankedPlayers[0];
   const isMeWinner = winner && winner.id === manager.myId;
   const isHost = manager.isHost;
+
+  // 1.5s tap-lockout guard: prevents hand-momentum misclicks from fast gameplay tapping
+  const [canInteract, setCanInteract] = useState(false);
+  const [lockoutRemaining, setLockoutRemaining] = useState(1.5);
+
+  useEffect(() => {
+    const LOCKOUT_MS = 1500;
+    const startTime = Date.now();
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, (LOCKOUT_MS - elapsed) / 1000);
+      setLockoutRemaining(Number(remaining.toFixed(1)));
+      if (remaining <= 0) {
+        setCanInteract(true);
+        clearInterval(timer);
+      }
+    }, 100);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     playGameOver(isMeWinner);
@@ -207,7 +227,9 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
           playersList.length < 2 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <button
+                disabled={!canInteract}
                 onClick={() => {
+                  if (!canInteract) return;
                   playTap();
                   onRematch();
                 }}
@@ -216,11 +238,16 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
                   width: '100%',
                   padding: '16px',
                   fontSize: '1.05rem',
-                  background: 'linear-gradient(135deg, #FF7700, #FFE600)'
+                  background: 'linear-gradient(135deg, #FF7700, #FFE600)',
+                  opacity: canInteract ? 1 : 0.65,
+                  cursor: canInteract ? 'pointer' : 'not-allowed',
+                  transition: 'opacity 0.25s ease'
                 }}
               >
                 <RotateCcw size={20} />
-                <span>RETURN TO LOBBY (INVITE PLAYERS)</span>
+                <span>
+                  {canInteract ? 'RETURN TO LOBBY (INVITE PLAYERS)' : `RESULTS READY IN ${lockoutRemaining}s...`}
+                </span>
               </button>
               <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#FF7700', fontWeight: 700 }}>
                 ⚠️ Other player(s) left the room. Go to lobby to invite friends.
@@ -228,15 +255,28 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
             </div>
           ) : (
             <button
+              disabled={!canInteract}
               onClick={() => {
+                if (!canInteract) return;
                 playTap();
                 onRematch();
               }}
               className="btn-primary"
-              style={{ width: '100%', padding: '16px', fontSize: '1.15rem' }}
+              style={{
+                width: '100%',
+                padding: '16px',
+                fontSize: '1.15rem',
+                opacity: canInteract ? 1 : 0.65,
+                cursor: canInteract ? 'pointer' : 'not-allowed',
+                transition: 'opacity 0.25s ease'
+              }}
             >
               <RotateCcw size={20} />
-              <span>PLAY AGAIN / REMATCH ({playersList.length} PLAYERS)</span>
+              <span>
+                {canInteract
+                  ? `PLAY AGAIN / REMATCH (${playersList.length} PLAYERS)`
+                  : `MATCH COMPLETE (${lockoutRemaining}s)...`}
+              </span>
             </button>
           )
         ) : (
@@ -255,12 +295,21 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
         )}
 
         <button
+          disabled={!canInteract}
           onClick={() => {
+            if (!canInteract) return;
             playTap();
             onLeave();
           }}
           className="btn-secondary"
-          style={{ width: '100%', padding: '12px', fontSize: '0.95rem' }}
+          style={{
+            width: '100%',
+            padding: '12px',
+            fontSize: '0.95rem',
+            opacity: canInteract ? 1 : 0.65,
+            cursor: canInteract ? 'pointer' : 'not-allowed',
+            transition: 'opacity 0.25s ease'
+          }}
         >
           <Home size={16} />
           <span>RETURN TO HOME</span>
