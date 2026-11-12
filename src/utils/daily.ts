@@ -45,14 +45,48 @@ export function getDailyChallengeConfig(dateStr: string = getTodayDateString()):
   const targetScore = 250 + Math.floor(rng() * 150); // 250 to 400
   const speedMultiplier = Number((1.1 + rng() * 0.3).toFixed(2)); // 1.1 to 1.4
 
-  // Shuffle master colors deterministically
-  const shuffled = [...MASTER_COLOR_LIST];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  // Group colors by family to guarantee maximum visual contrast across different families
+  const families: Record<string, ColorDef[]> = {
+    red: [],
+    blue: [],
+    green: [],
+    yellow: [],
+    purple: [],
+    orange: []
+  };
+
+  for (const c of MASTER_COLOR_LIST) {
+    families[c.family]?.push(c);
   }
 
-  const selectedColors = shuffled.slice(0, colorCount);
+  // Shuffle each family deterministically
+  const familyKeys = Object.keys(families);
+  for (const key of familyKeys) {
+    const list = families[key];
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+  }
+
+  // Shuffle family order deterministically
+  for (let i = familyKeys.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [familyKeys[i], familyKeys[j]] = [familyKeys[j], familyKeys[i]];
+  }
+
+  // Round-robin selection guarantees every family is represented before any family gets a second color
+  const selectedColors: ColorDef[] = [];
+  let familyIndex = 0;
+  while (selectedColors.length < colorCount) {
+    const fam = familyKeys[familyIndex % familyKeys.length];
+    const color = families[fam].shift();
+    if (color) {
+      selectedColors.push(color);
+    }
+    familyIndex++;
+  }
+
   const colorIds = selectedColors.map((c) => c.id);
 
   return {

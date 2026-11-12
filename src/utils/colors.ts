@@ -1,286 +1,287 @@
 import { ColorDef, Question } from '../types/game';
 
-// Master palette of 30 vibrant, carefully-curated neon colors for arcade Stroop gameplay
+// Master palette of 30 vibrant, high-perceptual-contrast colors for arcade Stroop gameplay
+// Every single color has a distinct hue angle, brightness, and personality to prevent visual confusion.
 export const MASTER_COLORS: Record<string, ColorDef> = {
-  // --- RED FAMILY ---
+  // --- RED FAMILY (5 distinct personalities) ---
   RED: {
     id: 'RED',
     name: 'RED',
-    hex: '#FF3366',
-    glow: 'rgba(255, 51, 102, 0.65)',
+    hex: '#FF0055',
+    glow: 'rgba(255, 0, 85, 0.75)',
     darkHex: '#3D0014',
-    rgb: '255, 51, 102',
+    rgb: '255, 0, 85',
     family: 'red'
   },
   CRIMSON: {
     id: 'CRIMSON',
     name: 'CRIMSON',
-    hex: '#FF1744',
-    glow: 'rgba(255, 23, 68, 0.65)',
-    darkHex: '#3A000E',
-    rgb: '255, 23, 68',
+    hex: '#8B0000',
+    glow: 'rgba(220, 20, 60, 0.75)',
+    darkHex: '#2A0000',
+    rgb: '139, 0, 0',
     family: 'red'
   },
   CORAL: {
     id: 'CORAL',
     name: 'CORAL',
-    hex: '#FF6B6B',
-    glow: 'rgba(255, 107, 107, 0.65)',
-    darkHex: '#421414',
-    rgb: '255, 107, 107',
+    hex: '#FF7F7F',
+    glow: 'rgba(255, 127, 127, 0.75)',
+    darkHex: '#3D1C1C',
+    rgb: '255, 127, 127',
     family: 'red'
   },
   ROSE: {
     id: 'ROSE',
     name: 'ROSE',
-    hex: '#FF2A85',
-    glow: 'rgba(255, 42, 133, 0.65)',
-    darkHex: '#40001E',
-    rgb: '255, 42, 133',
+    hex: '#FF1493',
+    glow: 'rgba(255, 20, 147, 0.75)',
+    darkHex: '#3D0022',
+    rgb: '255, 20, 147',
     family: 'red'
   },
   RUBY: {
     id: 'RUBY',
     name: 'RUBY',
-    hex: '#E0115F',
-    glow: 'rgba(224, 17, 95, 0.65)',
-    darkHex: '#380017',
-    rgb: '224, 17, 95',
+    hex: '#6B003B',
+    glow: 'rgba(180, 0, 90, 0.75)',
+    darkHex: '#2E0018',
+    rgb: '107, 0, 59',
     family: 'red'
   },
 
-  // --- BLUE / CYAN FAMILY ---
+  // --- BLUE / CYAN FAMILY (5 distinct personalities) ---
   CYAN: {
     id: 'CYAN',
     name: 'CYAN',
-    hex: '#00E5FF',
-    glow: 'rgba(0, 229, 255, 0.65)',
+    hex: '#00F0FF',
+    glow: 'rgba(0, 240, 255, 0.75)',
     darkHex: '#002538',
-    rgb: '0, 229, 255',
+    rgb: '0, 240, 255',
     family: 'blue'
   },
   BLUE: {
     id: 'BLUE',
     name: 'BLUE',
-    hex: '#2979FF',
-    glow: 'rgba(41, 121, 255, 0.65)',
+    hex: '#1E50FF',
+    glow: 'rgba(30, 80, 255, 0.75)',
     darkHex: '#001A4A',
-    rgb: '41, 121, 255',
+    rgb: '30, 80, 255',
     family: 'blue'
   },
   SKY: {
     id: 'SKY',
     name: 'SKY',
-    hex: '#00B0FF',
-    glow: 'rgba(0, 176, 255, 0.65)',
-    darkHex: '#00223B',
-    rgb: '0, 176, 255',
+    hex: '#8CE8FF',
+    glow: 'rgba(140, 232, 255, 0.75)',
+    darkHex: '#14303B',
+    rgb: '140, 232, 255',
     family: 'blue'
   },
   TEAL: {
     id: 'TEAL',
     name: 'TEAL',
-    hex: '#00E5D0',
-    glow: 'rgba(0, 229, 208, 0.65)',
-    darkHex: '#002E29',
-    rgb: '0, 229, 208',
+    hex: '#008080',
+    glow: 'rgba(0, 200, 200, 0.65)',
+    darkHex: '#002222',
+    rgb: '0, 128, 128',
     family: 'blue'
   },
   AQUA: {
     id: 'AQUA',
     name: 'AQUA',
-    hex: '#18FFFF',
-    glow: 'rgba(24, 255, 255, 0.65)',
-    darkHex: '#003333',
-    rgb: '24, 255, 255',
+    hex: '#002F6C',
+    glow: 'rgba(0, 100, 220, 0.75)',
+    darkHex: '#001433',
+    rgb: '0, 47, 108',
     family: 'blue'
   },
 
-  // --- GREEN FAMILY ---
+  // --- GREEN FAMILY (5 distinct personalities) ---
   GREEN: {
     id: 'GREEN',
     name: 'GREEN',
-    hex: '#00FF88',
-    glow: 'rgba(0, 255, 136, 0.65)',
-    darkHex: '#003319',
-    rgb: '0, 255, 136',
+    hex: '#00FF66',
+    glow: 'rgba(0, 255, 102, 0.75)',
+    darkHex: '#003314',
+    rgb: '0, 255, 102',
     family: 'green'
   },
   LIME: {
     id: 'LIME',
     name: 'LIME',
-    hex: '#76FF03',
-    glow: 'rgba(118, 255, 3, 0.65)',
-    darkHex: '#183800',
-    rgb: '118, 255, 3',
+    hex: '#BFFF00',
+    glow: 'rgba(191, 255, 0, 0.75)',
+    darkHex: '#253300',
+    rgb: '191, 255, 0',
     family: 'green'
   },
   EMERALD: {
     id: 'EMERALD',
     name: 'EMERALD',
-    hex: '#00E676',
-    glow: 'rgba(0, 230, 118, 0.65)',
-    darkHex: '#003619',
-    rgb: '0, 230, 118',
+    hex: '#005C2B',
+    glow: 'rgba(0, 160, 75, 0.75)',
+    darkHex: '#002410',
+    rgb: '0, 92, 43',
     family: 'green'
   },
   MINT: {
     id: 'MINT',
     name: 'MINT',
-    hex: '#69F0AE',
-    glow: 'rgba(105, 240, 174, 0.65)',
-    darkHex: '#123824',
-    rgb: '105, 240, 174',
+    hex: '#98FFD9',
+    glow: 'rgba(152, 255, 217, 0.75)',
+    darkHex: '#143828',
+    rgb: '152, 255, 217',
     family: 'green'
   },
   JADE: {
     id: 'JADE',
     name: 'JADE',
-    hex: '#00C853',
-    glow: 'rgba(0, 200, 83, 0.65)',
-    darkHex: '#003314',
-    rgb: '0, 200, 83',
+    hex: '#556B2F',
+    glow: 'rgba(120, 150, 70, 0.75)',
+    darkHex: '#1F290F',
+    rgb: '85, 107, 47',
     family: 'green'
   },
 
-  // --- YELLOW / GOLD FAMILY ---
+  // --- YELLOW / GOLD FAMILY (5 distinct personalities) ---
   YELLOW: {
     id: 'YELLOW',
     name: 'YELLOW',
-    hex: '#FFE600',
-    glow: 'rgba(255, 230, 0, 0.65)',
-    darkHex: '#383000',
-    rgb: '255, 230, 0',
+    hex: '#FFFF00',
+    glow: 'rgba(255, 255, 0, 0.75)',
+    darkHex: '#383800',
+    rgb: '255, 255, 0',
     family: 'yellow'
   },
   GOLD: {
     id: 'GOLD',
     name: 'GOLD',
-    hex: '#FFD700',
-    glow: 'rgba(255, 215, 0, 0.65)',
-    darkHex: '#382E00',
-    rgb: '255, 215, 0',
+    hex: '#B8860B',
+    glow: 'rgba(218, 165, 32, 0.75)',
+    darkHex: '#2E2203',
+    rgb: '184, 134, 11',
     family: 'yellow'
   },
   AMBER: {
     id: 'AMBER',
     name: 'AMBER',
-    hex: '#FFC400',
-    glow: 'rgba(255, 196, 0, 0.65)',
-    darkHex: '#3D2D00',
-    rgb: '255, 196, 0',
+    hex: '#D97706',
+    glow: 'rgba(217, 119, 6, 0.75)',
+    darkHex: '#3D1F00',
+    rgb: '217, 119, 6',
     family: 'yellow'
   },
   LEMON: {
     id: 'LEMON',
     name: 'LEMON',
-    hex: '#FFFF00',
-    glow: 'rgba(255, 255, 0, 0.65)',
-    darkHex: '#3B3B00',
-    rgb: '255, 255, 0',
+    hex: '#FFF9B0',
+    glow: 'rgba(255, 249, 176, 0.75)',
+    darkHex: '#3B3A24',
+    rgb: '255, 249, 176',
     family: 'yellow'
   },
   CANARY: {
     id: 'CANARY',
     name: 'CANARY',
-    hex: '#FFEA00',
-    glow: 'rgba(255, 234, 0, 0.65)',
-    darkHex: '#3D3600',
-    rgb: '255, 234, 0',
+    hex: '#FFE066',
+    glow: 'rgba(255, 224, 102, 0.75)',
+    darkHex: '#382F0A',
+    rgb: '255, 224, 102',
     family: 'yellow'
   },
 
-  // --- PURPLE / VIOLET FAMILY ---
+  // --- PURPLE / VIOLET FAMILY (5 distinct personalities) ---
   PURPLE: {
     id: 'PURPLE',
     name: 'PURPLE',
-    hex: '#B026FF',
-    glow: 'rgba(176, 38, 255, 0.65)',
+    hex: '#9D00FF',
+    glow: 'rgba(157, 0, 255, 0.75)',
     darkHex: '#26003B',
-    rgb: '176, 38, 255',
+    rgb: '157, 0, 255',
     family: 'purple'
   },
   VIOLET: {
     id: 'VIOLET',
     name: 'VIOLET',
-    hex: '#7C4DFF',
-    glow: 'rgba(124, 77, 255, 0.65)',
-    darkHex: '#1B0A42',
-    rgb: '124, 77, 255',
+    hex: '#D1B3FF',
+    glow: 'rgba(209, 179, 255, 0.75)',
+    darkHex: '#2B1F3D',
+    rgb: '209, 179, 255',
     family: 'purple'
   },
   MAGENTA: {
     id: 'MAGENTA',
     name: 'MAGENTA',
-    hex: '#FF00FF',
-    glow: 'rgba(255, 0, 255, 0.65)',
-    darkHex: '#380038',
-    rgb: '255, 0, 255',
+    hex: '#FF00AA',
+    glow: 'rgba(255, 0, 170, 0.75)',
+    darkHex: '#380026',
+    rgb: '255, 0, 170',
     family: 'purple'
   },
   ORCHID: {
     id: 'ORCHID',
     name: 'ORCHID',
-    hex: '#E040FB',
-    glow: 'rgba(224, 64, 251, 0.65)',
-    darkHex: '#33003B',
-    rgb: '224, 64, 251',
+    hex: '#52006A',
+    glow: 'rgba(140, 0, 180, 0.75)',
+    darkHex: '#21002B',
+    rgb: '82, 0, 106',
     family: 'purple'
   },
   INDIGO: {
     id: 'INDIGO',
     name: 'INDIGO',
-    hex: '#536DFE',
-    glow: 'rgba(83, 109, 254, 0.65)',
-    darkHex: '#0D1445',
-    rgb: '83, 109, 254',
+    hex: '#2B1A78',
+    glow: 'rgba(80, 50, 220, 0.75)',
+    darkHex: '#120A38',
+    rgb: '43, 26, 120',
     family: 'purple'
   },
 
-  // --- ORANGE FAMILY ---
+  // --- ORANGE FAMILY (5 distinct personalities) ---
   ORANGE: {
     id: 'ORANGE',
     name: 'ORANGE',
-    hex: '#FF7700',
-    glow: 'rgba(255, 119, 0, 0.65)',
-    darkHex: '#3B1A00',
-    rgb: '255, 119, 0',
+    hex: '#FF5500',
+    glow: 'rgba(255, 85, 0, 0.75)',
+    darkHex: '#3B1400',
+    rgb: '255, 85, 0',
     family: 'orange'
   },
   TANGERINE: {
     id: 'TANGERINE',
     name: 'TANGERINE',
-    hex: '#FF9100',
-    glow: 'rgba(255, 145, 0, 0.65)',
-    darkHex: '#3D2000',
-    rgb: '255, 145, 0',
+    hex: '#8C3200',
+    glow: 'rgba(140, 50, 0, 0.75)',
+    darkHex: '#290E00',
+    rgb: '140, 50, 0',
     family: 'orange'
   },
   PEACH: {
     id: 'PEACH',
     name: 'PEACH',
-    hex: '#FF8A65',
-    glow: 'rgba(255, 138, 101, 0.65)',
-    darkHex: '#3D1C12',
-    rgb: '255, 138, 101',
+    hex: '#FFD1B3',
+    glow: 'rgba(255, 209, 179, 0.75)',
+    darkHex: '#3B291F',
+    rgb: '255, 209, 179',
     family: 'orange'
   },
   APRICOT: {
     id: 'APRICOT',
     name: 'APRICOT',
-    hex: '#FFA726',
-    glow: 'rgba(255, 167, 38, 0.65)',
-    darkHex: '#3D2400',
-    rgb: '255, 167, 38',
+    hex: '#FF9E1B',
+    glow: 'rgba(255, 158, 27, 0.75)',
+    darkHex: '#382003',
+    rgb: '255, 158, 27',
     family: 'orange'
   },
   FLAME: {
     id: 'FLAME',
     name: 'FLAME',
-    hex: '#FF5722',
-    glow: 'rgba(255, 87, 34, 0.65)',
-    darkHex: '#3D1205',
-    rgb: '255, 87, 34',
+    hex: '#FF2A00',
+    glow: 'rgba(255, 42, 0, 0.75)',
+    darkHex: '#3D0A00',
+    rgb: '255, 42, 0',
     family: 'orange'
   }
 };
