@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
+import { Analytics } from '@vercel/analytics/react';
 import { GameState, GameMode, UserProgress } from './types/game';
 import { HomeScreen } from './components/HomeScreen';
 import { GameplayScreen } from './components/GameplayScreen';
@@ -418,6 +419,7 @@ export function App() {
           />
         )}
       </main>
+      <Analytics />
     </>
   );
 }
