@@ -31,12 +31,12 @@ export function getColorsForMultiplayer(colorCount: 6 | 10 | 16): ColorDef[] {
     return colors10;
   }
 
-  // 16 Colors: 16 diverse high-contrast shades (No 3-yellow confusion)
+  // 16 Colors: 16 diverse high-contrast shades (100% distinct hues, strictly 1 yellow)
   const colors16: ColorDef[] = [
     ...colors10,
     MASTER_COLORS.TEAL,
     MASTER_COLORS.VIOLET,
-    MASTER_COLORS.TANGERINE,
+    MASTER_COLORS.PEACH,
     MASTER_COLORS.SKY,
     MASTER_COLORS.MINT,
     MASTER_COLORS.ROSE

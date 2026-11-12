@@ -30,17 +30,22 @@ export function getColorCountForLevel(level: number): number {
   return 30; // 49-50
 }
 
-// Master ordered list of colors prioritized by similarity tier:
-// Early & mid levels use diverse, high-contrast colors across all 6 families without confusing duplicate shades.
+// Master ordered list of colors prioritized by distinct visual contrast:
+// Early & mid levels (up to level 40) draw only completely distinct hues across all families
+// with strictly ONE yellow to completely eliminate yellow-confusion.
 const COLOR_ORDER_BY_SIMILARITY: string[] = [
-  // Primary diverse set (5-6)
+  // Primary diverse set (5-6 colors)
   'RED', 'CYAN', 'GREEN', 'YELLOW', 'PURPLE', 'ORANGE',
-  // Tier 1 additions (7-12) — distinct hues across families (no duplicate yellows)
-  'LIME', 'MAGENTA', 'BLUE', 'ROSE', 'CORAL', 'TEAL',
-  // Tier 2 additions (13-20) — richer secondary shades
-  'CRIMSON', 'MINT', 'SKY', 'VIOLET', 'TANGERINE', 'EMERALD', 'AQUA', 'GOLD',
-  // Tier 3 additions (21-30) — expert subtle shades reserved for master levels
-  'AMBER', 'LEMON', 'ORCHID', 'PEACH', 'JADE', 'CANARY', 'INDIGO', 'FLAME', 'RUBY', 'APRICOT'
+  // Tier 1 additions (7-10 colors) — distinct high-contrast secondary hues (only 1 yellow)
+  'LIME', 'MAGENTA', 'BLUE', 'CORAL',
+  // Tier 2 additions (11-16 colors) — rich distinct hues (only 1 yellow)
+  'TEAL', 'SKY', 'VIOLET', 'PEACH', 'MINT', 'ROSE',
+  // Tier 2b additions (17-20 colors) — vibrant electric shades (only 1 yellow)
+  'FLAME', 'AQUA', 'INDIGO', 'CRIMSON',
+  // Tier 3 additions (21-24 colors) — expert level additions
+  'EMERALD', 'ORCHID', 'TANGERINE', 'APRICOT',
+  // Master Tier additions (25-30 colors) — reserved exclusively for ultimate levels 45-50
+  'GOLD', 'JADE', 'AMBER', 'LEMON', 'CANARY', 'RUBY'
 ];
 
 // Target score calibrated to be demanding yet achievable in 30 seconds

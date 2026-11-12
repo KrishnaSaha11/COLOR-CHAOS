@@ -1,5 +1,5 @@
 import { ColorDef, LevelConfig } from '../types/game';
-import { MASTER_COLOR_LIST } from './colors';
+import { MASTER_COLORS } from './colors';
 
 // Mulberry32 deterministic PRNG from a 32-bit integer seed
 export function mulberry32(a: number) {
@@ -45,48 +45,22 @@ export function getDailyChallengeConfig(dateStr: string = getTodayDateString()):
   const targetScore = 250 + Math.floor(rng() * 150); // 250 to 400
   const speedMultiplier = Number((1.1 + rng() * 0.3).toFixed(2)); // 1.1 to 1.4
 
-  // Group colors by family to guarantee maximum visual contrast across different families
-  const families: Record<string, ColorDef[]> = {
-    red: [],
-    blue: [],
-    green: [],
-    yellow: [],
-    purple: [],
-    orange: []
-  };
+  // 16 curated high-contrast neon colors (Strictly 1 yellow, zero duplicate shades)
+  const DISTINCT_DAILY_KEYS = [
+    'RED', 'CYAN', 'GREEN', 'YELLOW', 'PURPLE', 'ORANGE',
+    'LIME', 'MAGENTA', 'BLUE', 'CORAL', 'TEAL', 'SKY',
+    'VIOLET', 'PEACH', 'MINT', 'ROSE'
+  ];
 
-  for (const c of MASTER_COLOR_LIST) {
-    families[c.family]?.push(c);
-  }
+  const pool = DISTINCT_DAILY_KEYS.map((k) => MASTER_COLORS[k]).filter(Boolean);
 
-  // Shuffle each family deterministically
-  const familyKeys = Object.keys(families);
-  for (const key of familyKeys) {
-    const list = families[key];
-    for (let i = list.length - 1; i > 0; i--) {
-      const j = Math.floor(rng() * (i + 1));
-      [list[i], list[j]] = [list[j], list[i]];
-    }
-  }
-
-  // Shuffle family order deterministically
-  for (let i = familyKeys.length - 1; i > 0; i--) {
+  // Deterministically shuffle the distinct pool
+  for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
-    [familyKeys[i], familyKeys[j]] = [familyKeys[j], familyKeys[i]];
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  // Round-robin selection guarantees every family is represented before any family gets a second color
-  const selectedColors: ColorDef[] = [];
-  let familyIndex = 0;
-  while (selectedColors.length < colorCount) {
-    const fam = familyKeys[familyIndex % familyKeys.length];
-    const color = families[fam].shift();
-    if (color) {
-      selectedColors.push(color);
-    }
-    familyIndex++;
-  }
-
+  const selectedColors = pool.slice(0, colorCount);
   const colorIds = selectedColors.map((c) => c.id);
 
   return {
