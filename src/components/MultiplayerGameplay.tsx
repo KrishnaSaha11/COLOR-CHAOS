@@ -83,18 +83,17 @@ export const MultiplayerGameplay: React.FC<MultiplayerGameplayProps> = ({
     }
   }, [manager]);
 
-  // ★ COUNTDOWN EFFECT — Uses monotonic performance.now()
-  //   Guarantees exact 3.0s (3... 2... 1... GO!) countdown on both Host & Guest,
-  //   completely immune to OS clock drift between phone and laptop!
+  // ★ SYNCHRONIZED COUNTDOWN EFFECT
+  //   Anchored to manager.targetGameStartMs which is synchronized across all devices
+  //   via NTP clock offset calibration and broker lead-time buffer.
+  //   Both Host and Guest reach "GO!" at the exact same physical millisecond.
   useEffect(() => {
     if (countdownDoneRef.current) return;
 
-    const startPerf = performance.now();
-    const TOTAL_COUNTDOWN_MS = 3000;
+    const targetStart = manager.targetGameStartMs || (Date.now() + 3000);
 
     const check = () => {
-      const elapsed = performance.now() - startPerf;
-      const remainingMs = TOTAL_COUNTDOWN_MS - elapsed;
+      const remainingMs = targetStart - Date.now();
 
       if (remainingMs > 2000) {
         setCountdownText('3');
@@ -103,11 +102,11 @@ export const MultiplayerGameplay: React.FC<MultiplayerGameplayProps> = ({
       } else if (remainingMs > 0) {
         setCountdownText('1');
       } else {
-        // Countdown finished
+        // Countdown finished — Start Game!
         setCountdownText('GO!');
         if (!countdownDoneRef.current) {
           countdownDoneRef.current = true;
-          setTimeout(() => setIsCountingDown(false), 250);
+          setTimeout(() => setIsCountingDown(false), 200);
         }
         return true;
       }
@@ -120,10 +119,10 @@ export const MultiplayerGameplay: React.FC<MultiplayerGameplayProps> = ({
       if (check()) {
         clearInterval(interval);
       }
-    }, 50);
+    }, 25);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [manager]);
 
   // ★ MAIN GAME TIMER — starts precisely when isCountingDown becomes false.
   //   Uses performance.now() anchored once. Completely immune to re-renders.

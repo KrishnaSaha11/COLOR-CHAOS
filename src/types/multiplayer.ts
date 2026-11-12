@@ -36,11 +36,11 @@ export type PeerMessage =
   | { type: 'JOIN_REJECTED'; reason: string }
   | { type: 'ROOM_UPDATE'; roomState: RoomState }
   | { type: 'SETTINGS_UPDATE'; settings: MultiplayerSettings }
-  | { type: 'START_COUNTDOWN'; countdownStartMs: number; gameStartMs: number; questions?: Question[]; seed?: number }
+  | { type: 'START_COUNTDOWN'; countdownStartMs: number; gameStartMs: number; questions?: Question[]; seed?: number; hostStartTime?: number }
   | { type: 'SCORE_UPDATE'; playerId: string; score: number; streak: number; correct: boolean }
   | { type: 'PLAYER_FINISHED'; playerId: string; finalScore: number; longestStreak: number; correctCount: number; wrongCount: number }
   | { type: 'REMATCH' }
   | { type: 'PLAYER_LEFT'; playerId: string; playerName?: string }
   | { type: 'HOST_CLOSED'; reason: string }
-  | { type: 'PING' }
-  | { type: 'PONG' };
+  | { type: 'PING'; clientTime?: number; senderId?: string; hostId?: string }
+  | { type: 'PONG'; clientTime?: number; hostTime?: number };

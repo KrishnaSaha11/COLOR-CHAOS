@@ -111,6 +111,10 @@ export const MultiplayerResults: React.FC<MultiplayerResultsProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
+          background: 'none',
+          backgroundColor: 'transparent',
+          WebkitBackgroundClip: 'border-box',
+          WebkitTextFillColor: 'currentColor',
           color: !allFinished
             ? '#00E5FF'
             : isMeWinner

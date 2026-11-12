@@ -13,12 +13,14 @@ export class MultiplayerManager {
   private client: MqttClient | null = null;
   private currentRoomCode: string = '';
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
-  private pendingHostCountdownTrigger: (() => void) | null = null;
+  private pingTimer: ReturnType<typeof setInterval> | null = null;
 
   public isHost: boolean = false;
   public myId: string = '';
   public myName: string = '';
   public roomState: RoomState | null = null;
+  public clockOffset: number = 0; // NTP-style: hostTime - localTime (positive = host ahead)
+  public targetGameStartMs: number = 0; // Local timestamp when gameplay starts (synchronized)
 
   // Callbacks for UI
   public onStateUpdate: ((state: RoomState) => void) | null = null;
@@ -223,6 +225,28 @@ export class MultiplayerManager {
                 if (pingInterval) clearInterval(pingInterval);
                 this.roomState = msg.roomState;
                 if (this.onStateUpdate) this.onStateUpdate(this.roomState);
+
+                // Start rapid time-sync burst & continuous keepalive ping
+                const sendPing = () => {
+                  if (this.client?.connected && this.currentRoomCode) {
+                    this.client.publish(
+                      `cchaos/v1/${this.currentRoomCode}/host`,
+                      JSON.stringify({
+                        type: 'PING',
+                        senderId: guestId,
+                        clientTime: Date.now()
+                      }),
+                      { qos: 0 }
+                    );
+                  }
+                };
+
+                // Burst of 3 pings spaced 80ms apart to calibrate NTP clock offset immediately upon joining
+                sendPing();
+                setTimeout(sendPing, 80);
+                setTimeout(sendPing, 200);
+                this.pingTimer = setInterval(sendPing, 2500);
+
                 resolve(msg.roomState);
               }
             } else if (msg.type === 'JOIN_REJECTED') {
@@ -272,15 +296,20 @@ export class MultiplayerManager {
   // ======================================================================
   //  HOST MESSAGE ROUTER
   // ======================================================================
-  private handleHostIncoming(topic: string, msg: PeerMessage & { playerId?: string; name?: string }) {
+  private handleHostIncoming(topic: string, msg: PeerMessage & { playerId?: string; name?: string; senderId?: string; clientTime?: number }) {
     if (!this.roomState || !this.client?.connected) return;
 
-    if (msg.type === 'START_COUNTDOWN') {
-      // Received broadcast echo from broker — trigger Host countdown in exact sync with Guest
-      if (this.pendingHostCountdownTrigger) {
-        this.pendingHostCountdownTrigger();
-        this.pendingHostCountdownTrigger = null;
-      }
+    if (msg.type === 'PING' && msg.senderId && typeof msg.clientTime === 'number') {
+      // Respond immediately to guest for high-precision NTP clock offset calibration
+      this.client.publish(
+        `cchaos/v1/${this.currentRoomCode}/player/${msg.senderId}`,
+        JSON.stringify({
+          type: 'PONG',
+          clientTime: msg.clientTime,
+          hostTime: Date.now()
+        }),
+        { qos: 0 }
+      );
       return;
     }
 
@@ -382,6 +411,12 @@ export class MultiplayerManager {
     if (msg.type === 'ROOM_UPDATE') {
       this.roomState = msg.roomState;
       if (this.onStateUpdate) this.onStateUpdate(this.roomState);
+    } else if (msg.type === 'PONG' && typeof (msg as any).clientTime === 'number' && typeof (msg as any).hostTime === 'number') {
+      // NTP-style clock offset calculation
+      const now = Date.now();
+      const rtt = now - (msg as any).clientTime;
+      const oneWay = rtt / 2;
+      this.clockOffset = (msg as any).hostTime + oneWay - now;
     } else if (msg.type === 'START_COUNTDOWN') {
       if (this.roomState) {
         this.roomState.status = 'COUNTDOWN';
@@ -393,14 +428,26 @@ export class MultiplayerManager {
           this.roomState.questions = msg.questions;
         }
 
-        const now = Date.now();
-        this.roomState.countdownStartMs = now;
-        this.roomState.gameStartMs = now + 3000;
+        // Calibrate target start time using NTP clock offset
+        // hostTime = localTime + clockOffset => localTime = hostTime - clockOffset
+        let localGameStartMs = msg.gameStartMs - this.clockOffset;
+        let localCountdownStartMs = msg.countdownStartMs - this.clockOffset;
+        const remainingToGame = localGameStartMs - Date.now();
+
+        // Safety guard: if clocks were desynchronized (> 6s difference) and no NTP pong was received yet
+        if (remainingToGame < 400 || remainingToGame > 5500) {
+          localGameStartMs = Date.now() + 3000;
+          localCountdownStartMs = Date.now();
+        }
+
+        this.targetGameStartMs = localGameStartMs;
+        this.roomState.countdownStartMs = localCountdownStartMs;
+        this.roomState.gameStartMs = localGameStartMs;
 
         if (this.onStateUpdate) this.onStateUpdate(this.roomState);
       }
       if (this.onCountdown) {
-        this.onCountdown(Date.now(), Date.now() + 3000);
+        this.onCountdown(this.roomState?.countdownStartMs || Date.now(), this.targetGameStartMs);
       }
     } else if (msg.type === 'REMATCH') {
       if (this.roomState) {
@@ -476,50 +523,42 @@ export class MultiplayerManager {
     const questions = generateMultiplayerQuestionSequence(colors, seed, 120);
 
     const now = Date.now();
-    const countdownStartMs = now;
-    const gameStartMs = now + 3200;
+    // 400ms network transit lead-time buffer
+    // This gives mobile devices (4G/5G) ample time to receive the lightweight ~80 byte packet
+    // before the countdown begins, ensuring ALL players start counting down together.
+    const leadTimeMs = 400;
+    const countdownStartMs = now + leadTimeMs;
+    const gameStartMs = countdownStartMs + 3000;
 
     this.roomState.status = 'COUNTDOWN';
     this.roomState.questions = questions;
     this.roomState.countdownStartMs = countdownStartMs;
     this.roomState.gameStartMs = gameStartMs;
+    this.targetGameStartMs = gameStartMs;
 
     const startMsg: PeerMessage = {
       type: 'START_COUNTDOWN',
       countdownStartMs,
       gameStartMs,
-      seed,
-      questions
+      seed
     };
 
-    let hostStarted = false;
-    const triggerHost = () => {
-      if (hostStarted) return;
-      hostStarted = true;
-      if (this.onStateUpdate && this.roomState) this.onStateUpdate(this.roomState);
-      if (this.onCountdown) this.onCountdown(countdownStartMs, gameStartMs);
-    };
-
-    // Store trigger so handleHostIncoming executes it when the broker broadcasts the packet back
-    this.pendingHostCountdownTrigger = triggerHost;
-
-    // Publish to all subscribers in the room
+    // Publish lightweight seed packet (~80 bytes) to all subscribers
     this.client.publish(
       `cchaos/v1/${this.currentRoomCode}/all`,
       JSON.stringify(startMsg),
       { qos: 1 }
     );
 
-    // Fallback: If broker does not loop back to host within 200ms, start anyway
-    setTimeout(() => {
-      triggerHost();
-    }, 200);
+    // Host triggers countdown immediately anchored to targetGameStartMs
+    if (this.onStateUpdate) this.onStateUpdate(this.roomState);
+    if (this.onCountdown) this.onCountdown(countdownStartMs, gameStartMs);
 
     setTimeout(() => {
       if (this.roomState && this.roomState.status === 'COUNTDOWN') {
         this.roomState.status = 'PLAYING';
       }
-    }, 3700);
+    }, leadTimeMs + 3500);
   }
 
   public sendScoreUpdate(score: number, streak: number, isCorrect: boolean) {
@@ -642,6 +681,10 @@ export class MultiplayerManager {
       clearInterval(this.heartbeatTimer);
       this.heartbeatTimer = null;
     }
+    if (this.pingTimer) {
+      clearInterval(this.pingTimer);
+      this.pingTimer = null;
+    }
     if (this.client) {
       try {
         this.client.removeAllListeners();
@@ -652,5 +695,7 @@ export class MultiplayerManager {
     this.roomState = null;
     this.isHost = false;
     this.currentRoomCode = '';
+    this.targetGameStartMs = 0;
+    this.clockOffset = 0;
   }
 }
